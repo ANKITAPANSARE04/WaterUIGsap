@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realistic Water Ripple</title>
+    <title>Realistic Water Ripple - Universal Support</title>
     <style>
-        /* CSS to make the background fill the screen */
         body, html {
             margin: 0;
             padding: 0;
@@ -18,11 +17,12 @@
         .ripple-bg {
             width: 100vw;
             height: 100vh;
-            /* Replace the URL below with your own image path */
             background-image: url('https://m.media-amazon.com/images/I/81FSS+MhhdL._AC_UF1000,1000_QL80_.jpg');
             background-size: cover;
             background-position: center;
             cursor: pointer;
+            /* Prevents the browser from scrolling/bouncing when touching the ripples */
+            touch-action: none; 
         }
     </style>
 </head>
@@ -34,66 +34,57 @@
     <script src="https://cdn.jsdelivr.net/gh/sirxemic/jquery.ripples/dist/jquery.ripples-min.js"></script>
 
     <script>
-    jQuery(document).ready(function($) {
+    $(document).ready(function() {
         const $rippleArea = $('.ripple-bg');
 
-        // Initialize the ripples plugin
+        // Initialize ripples
         $rippleArea.ripples({
-            resolution: 512,      // Higher resolution = smoother ripples
-            perturbance: 0.04,    // Refraction intensity
-            dropRadius: 20,       // Size of the ripple
-            interactive: true     // Mouse movement triggers ripples
+            resolution: 512,
+            perturbance: 0.04,
+            dropRadius: 20,
+            interactive: true
         });
 
         let rippleTimeout;
-        let motionCheckInterval;
         let isPlaying = false;
 
-        function resumeRipple() {
+        // Function to wake up the ripple engine
+        function wakeUpRipples() {
             if (!isPlaying) {
                 $rippleArea.ripples('play');
                 isPlaying = true;
             }
 
+            // Clear any existing timer to pause
             clearTimeout(rippleTimeout);
-            // clearInterval(motionCheckInterval);
 
-            // Start checking for stillness after 900ms of no movement
+            // Set a timer to pause after 3 seconds of no activity
+            // This saves significant battery life on mobile devices
             rippleTimeout = setTimeout(() => {
-                startMotionCheck();
-            }, 900); 
+                $rippleArea.ripples('pause');
+                isPlaying = false;
+            }, 3000); 
         }
 
-        function startMotionCheck() {
-            // Note: This logic monitors the internal canvas of the plugin to save CPU
-            const canvas = $rippleArea.find('canvas')[0];
-            if(!canvas) return;
-            
-            const ctx = canvas.getContext('webgl') || canvas.getContext('2d');
-            let lastFrame;
-            let stillCounter = 0;
-
-            // motionCheckInterval = setInterval(() => {
-            //     // If movement has stopped, pause the simulation to save battery/CPU
-            //     if (isPlaying) {
-            //         stillCounter++;
-            //         if (stillCounter >= 5) { 
-            //             $rippleArea.ripples('pause');
-            //             isPlaying = false;
-            //             clearInterval(motionCheckInterval);
-            //         }
-            //     }
-            // }, 200);
-        }
-
-        // Trigger ripple and resume simulation on mouse move
+        // DESKTOP: Trigger on mouse movement
         $rippleArea.on('mousemove', function() {
-            resumeRipple();
+            wakeUpRipples();
         });
 
-        // Start paused to save resources until user interacts
+        // MOBILE & TABLET: Trigger on touch start or movement
+        // Also triggers on a simple "tap" (click)
+        $rippleArea.on('touchstart touchmove', function() {
+            wakeUpRipples();
+        });
+
+        // Ensure a simple click also triggers it (for accessibility)
+        $rippleArea.on('mousedown', function() {
+            wakeUpRipples();
+        });
+
+        // Start in paused state to save resources until first interaction
         $rippleArea.ripples('pause'); 
     });
     </script>
 </body>
-</html>  
+</html>
