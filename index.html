@@ -1,90 +1,228 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realistic Water Ripple - Universal Support</title>
+    <title>Emoji Hat Game - Clear Selection</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+        :root {
+            --face-size: clamp(150px, 60vw, 250px);
+            --bg-color: #2c2c2c;
+        }
+        body{margin: 0;display: flex;justify-content: space-between;
+            background-color: var(--bg-color);}
+        .mainConatent { 
+            height: 100vh;
+            display: flex;
+            flex-direction:column-reverse;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
-            background-color: #000;
         }
 
-        .ripple-bg {
-            width: 100vw;
-            height: 100vh;
-            background-image: url('https://m.media-amazon.com/images/I/81FSS+MhhdL._AC_UF1000,1000_QL80_.jpg');
-            background-size: cover;
-            background-position: center;
-            cursor: pointer;
-            /* Prevents the browser from scrolling/bouncing when touching the ripples */
-            touch-action: none; 
+        /* Hat Selection Grid */
+        .hat-menu {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
+        .hat-option {
+            font-size: 40px;
+            cursor: pointer;
+            background: #444;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 10px;
+            transition: transform 0.2s, background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        .hat-option:hover {
+            transform: scale(1.1);
+            background: #555;
+        }
+
+        .hat-option:active {
+            transform: scale(0.9);
+        }
+
+        /* The Emoji Face */
+        .face {
+            width: var(--face-size);
+            height: var(--face-size);
+            background: radial-gradient(circle at 50% 40%, #ffeb6e 0%, #ffb82b 70%, #d48411 100%);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 -5px 15px rgba(0,0,0,0.2), 0 15px 35px rgba(0,0,0,0.5);
+        }
+
+        /* Hat Display on Head */
+        .head-hat {
+            position: absolute;
+            top: -45%; /* Adjusted slightly for better fit */
+            font-size: calc(var(--face-size) * 0.55);
+            z-index: 10;
+            pointer-events: none;
+            display: none; 
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+        }
+
+        .eye-container {
+            display: flex;
+            gap: calc(var(--face-size) * 0.08);
+            margin-top: calc(var(--face-size) * 0.05);
+            z-index: 2;
+        }
+
+        .eye {
+            width: calc(var(--face-size) * 0.25);
+            height: calc(var(--face-size) * 0.25);
+            background-color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .pupil {
+            width: calc(var(--face-size) * 0.1);
+            height: calc(var(--face-size) * 0.1);
+            background-color: #1a1a1a;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .eyebrow {
+            position: absolute;
+            width: calc(var(--face-size) * 0.2);
+            height: calc(var(--face-size) * 0.04);
+            border: calc(var(--face-size) * 0.02) solid #4a2a00;
+            border-color: #4a2a00 transparent transparent transparent;
+            border-radius: 50%/20px 20px 0 0;
+            top: 22%;
+        }
+
+        .eyebrow.left { left: 18%; transform: rotate(-190deg); }
+        .eyebrow.right { right: 18%; transform: rotate(10deg); }
+
+        .mouth {
+            width: calc(var(--face-size) * 0.3);
+            height: calc(var(--face-size) * 0.025);
+            background-color: #4a2a00;
+            border-radius: 10px;
+            margin-top: 12%;
+            opacity: 0.8;
+        }
+        iframe{height: 100%;width: 100%;}
     </style>
 </head>
 <body>
+    <div><iframe src="./WaterRipple.html" title="description"></iframe></div>
+ <div class="mainConatent">
+    <div class="hat-menu">
+        <div class="hat-option" onclick="wearHat('🎩')">🎩</div>
+        <div class="hat-option" onclick="wearHat('🧢')">🧢</div>
+        <div class="hat-option" onclick="wearHat('👑')">👑</div>
+        <div class="hat-option" onclick="wearHat('🎓')">🎓</div>
+        <div class="hat-option" onclick="wearHat('👒')">👒</div>
+        <div class="hat-option" onclick="wearHat('🚫')">🚫</div>
+    </div>
 
-    <div class="ripple-bg"></div>
+    <div class="face">
+        <div id="active-hat" class="head-hat"></div>
+        <div class="eyebrow left"></div>
+        <div class="eyebrow right"></div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/sirxemic/jquery.ripples/dist/jquery.ripples-min.js"></script>
+        <div class="eye-container">
+            <div class="eye">
+                <div class="pupil"></div>
+            </div>
+            <div class="eye">
+                <div class="pupil"></div>
+            </div>
+        </div>
 
+        <div class="mouth"></div>
+    </div>
+</div>
+    <div><iframe src="./WaterRipple.html" title="description"></iframe></div>
     <script>
-    $(document).ready(function() {
-        const $rippleArea = $('.ripple-bg');
+        // Eye tracking logic
+        window.addEventListener('mousemove', (e) => {
+            const pupils = document.querySelectorAll('.pupil');
+            pupils.forEach(pupil => {
+                const rect = pupil.parentElement.getBoundingClientRect();
+                const eyeCenterX = rect.left + rect.width / 2;
+                const eyeCenterY = rect.top + rect.height / 2;
+                const angle = Math.atan2(e.clientY - eyeCenterY, e.clientX - eyeCenterX);
+                const maxDistance = rect.width * 0.28;
+                const moveX = Math.cos(angle) * maxDistance;
+                const moveY = Math.sin(angle) * maxDistance;
 
-        // Initialize ripples
-        $rippleArea.ripples({
-            resolution: 512,
-            perturbance: 0.04,
-            dropRadius: 20,
-            interactive: true
+                gsap.to(pupil, {
+                    x: moveX,
+                    y: moveY,
+                    duration: 0.2,
+                    ease: "power1.out"
+                });
+            });
         });
 
-        let rippleTimeout;
-        let isPlaying = false;
-
-        // Function to wake up the ripple engine
-        function wakeUpRipples() {
-            if (!isPlaying) {
-                $rippleArea.ripples('play');
-                isPlaying = true;
+        // Game logic: Wearing the hat or clearing it
+        function wearHat(emoji) {
+            const hatDisplay = document.getElementById('active-hat');
+            
+            // Check if user clicked the "Clear" emoji
+            if (emoji === '🚫') {
+                if (hatDisplay.style.display !== 'none') {
+                    // Animation for removing hat
+                    gsap.to(hatDisplay, {
+                        y: -50,
+                        opacity: 0,
+                        scale: 1.5,
+                        duration: 0.3,
+                        ease: "power2.in",
+                        onComplete: () => {
+                            hatDisplay.style.display = 'none';
+                        }
+                    });
+                }
+                return; // Stop here
             }
 
-            // Clear any existing timer to pause
-            clearTimeout(rippleTimeout);
+            // Normal Hat selection logic
+            hatDisplay.textContent = emoji;
+            hatDisplay.style.display = 'block';
 
-            // Set a timer to pause after 3 seconds of no activity
-            // This saves significant battery life on mobile devices
-            rippleTimeout = setTimeout(() => {
-                $rippleArea.ripples('pause');
-                isPlaying = false;
-            }, 3000); 
+            // GSAP Animation: Hat falls from top and bounces
+            gsap.fromTo(hatDisplay, 
+                { y: -150, opacity: 0, rotation: -15, scale: 0.5 }, 
+                { y: 0, opacity: 1, rotation: 0, scale: 1, duration: 0.6, ease: "bounce.out" }
+            );
+
+            // Face reaction
+            gsap.to(".face", { scale: 0.96, duration: 0.1, yoyo: true, repeat: 1 });
         }
-
-        // DESKTOP: Trigger on mouse movement
-        $rippleArea.on('mousemove', function() {
-            wakeUpRipples();
-        });
-
-        // MOBILE & TABLET: Trigger on touch start or movement
-        // Also triggers on a simple "tap" (click)
-        $rippleArea.on('touchstart touchmove', function() {
-            wakeUpRipples();
-        });
-
-        // Ensure a simple click also triggers it (for accessibility)
-        $rippleArea.on('mousedown', function() {
-            wakeUpRipples();
-        });
-
-        // Start in paused state to save resources until first interaction
-        $rippleArea.ripples('pause'); 
-    });
     </script>
 </body>
 </html>
